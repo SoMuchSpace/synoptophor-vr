@@ -89,6 +89,9 @@ class Vr {
 
         this._xrSession = await XR.requestSession("immersive-vr");
         this._xrSession.addEventListener("end", () => this.onXrSessionEnd());
+        this._xrSession.addEventListener("select", async () => {
+            await this.stopVrSession();
+        });
         this._glLayer = new XRWebGLLayer(this._xrSession, this._gl);
         this._xrSession.updateRenderState({baseLayer: this._glLayer});
         this._xrReferenceSpace = await this._xrSession.requestReferenceSpace("local");

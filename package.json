@@ -2,7 +2,7 @@
   "name": "synoptophor-vr",
   "version": "1.0.0",
   "scripts": {
-    "test": "http-server ./src"
+    "test": "http-server docs"
   },
   "devDependencies": {
     "http-server": "0.12.3"

@@ -157,7 +157,7 @@
             this.vr.rotationX = this.rotationX;
             this.vr.rotationY = this.rotationY;
         },
-        destroyed() {
+        beforeUnmount() {
             this.rotationAnimation?.stop();
         },
         methods: {
@@ -267,7 +267,7 @@
             this.vr.rotationX = this.fromRotationX;
             this.vr.rotationY = this.fromRotationY;
         },
-        beforeDestroy() {
+        beforeUnmount() {
             this.onStopMoving();
         },
         watch: {

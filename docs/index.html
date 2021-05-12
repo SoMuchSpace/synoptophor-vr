@@ -126,11 +126,17 @@
         template: `
           <div class="row mt2">
           <div class="w130px">Horizontal angle:</div>
-          <input type="number" step="0.1" v-bind:value="rotationY" v-on:input="setRotationY($event.target.value)">
+          <input type="number"
+                 step="0.1"
+                 :value="String(rotationY)"
+                 @input="setRotationY(toNumber($event.target.value))">
           </div>
           <div class="row mt2">
           <div class="w130px">Vertical angle:</div>
-          <input type="number" step="0.1" v-bind:value="rotationX" v-on:input="setRotationX($event.target.value)">
+          <input type="number"
+                 step="0.1"
+                 :value="String(rotationX)"
+                 @input="setRotationX(toNumber($event.target.value))">
           </div>
           <div class="row mt2">
           <label><input type="checkbox" v-model="smoothChange">Smooth change</label>
@@ -141,8 +147,8 @@
         },
         data() {
             return {
-                rotationX: Number(localStorage.getItem("VR.fixed.rotationX") ?? "0"),
-                rotationY: Number(localStorage.getItem("VR.fixed.rotationY") ?? "0"),
+                rotationX: Number(localStorage.getItem("VR.fixed.rotationX") || "0"),
+                rotationY: Number(localStorage.getItem("VR.fixed.rotationY") || "0"),
                 smoothChange: true,
                 rotationAnimation: null,
             };
@@ -190,6 +196,10 @@
                         this.vr.rotationY = fromRotationY + (rotationY - fromRotationY) * progress;
                     },
                 });
+            },
+            toNumber(string) {
+                const number = string ? Number(string) : 0;
+                return Number.isFinite(number) ? number : 0;
             }
         }
     }).component("moving-rotation-panel", {
@@ -197,17 +207,34 @@
         template: `
           <div class="row mt2">
           <div class="w130px">Duration:</div>
-          <input type="number" step="0.1" v-model="duration">
+          <input type="number"
+                 step="0.1"
+                 :value="String(duration)"
+                 @input="duration = toNumber($event.target.value)">
           </div>
           <div class="row mt2">
           <div class="w130px">Horizontal angle:</div>
-          <input type="number" step="0.1" v-model="fromRotationY">
-          <input class="ml1" type="number" step="0.1" v-model="toRotationY">
+          <input type="number"
+                 step="0.1"
+                 :value="String(fromRotationY)"
+                 @input="fromRotationY = toNumber($event.target.value)">
+          <input class="ml1"
+                 type="number"
+                 step="0.1"
+                 :value="String(toRotationY)"
+                 @input="toRotationY = toNumber($event.target.value)">
           </div>
           <div class="row mt2">
           <div class="w130px">Vertical angle:</div>
-          <input type="number" step="0.1" v-model="fromRotationX">
-          <input class="ml1" type="number" step="0.1" v-model="toRotationX">
+          <input type="number"
+                 step="0.1"
+                 :value="String(fromRotationX)"
+                 @input="fromRotationX = toNumber($event.target.value)">
+          <input class="ml1"
+                 type="number"
+                 step="0.1"
+                 :value="String(toRotationX)"
+                 @input="toRotationX = toNumber($event.target.value)">
           </div>
           <div class="row mt2">
           <button type="button"
@@ -227,11 +254,11 @@
         },
         data() {
             return {
-                duration: Number(localStorage.getItem("VR.moving.duration") ?? "0"),
-                fromRotationX: Number(localStorage.getItem("VR.moving.fromRotationX") ?? "0"),
-                toRotationX: Number(localStorage.getItem("VR.moving.toRotationX") ?? "0"),
-                fromRotationY: Number(localStorage.getItem("VR.moving.fromRotationY") ?? "0"),
-                toRotationY: Number(localStorage.getItem("VR.moving.toRotationY") ?? "0"),
+                duration: Number(localStorage.getItem("VR.moving.duration") || "0"),
+                fromRotationX: Number(localStorage.getItem("VR.moving.fromRotationX") || "0"),
+                toRotationX: Number(localStorage.getItem("VR.moving.toRotationX") || "0"),
+                fromRotationY: Number(localStorage.getItem("VR.moving.fromRotationY") || "0"),
+                toRotationY: Number(localStorage.getItem("VR.moving.toRotationY") || "0"),
                 direction: 1,
                 rotationAnimation: null,
             };
@@ -290,6 +317,10 @@
                         this.vr.rotationY = fromRotationY + (rotationY - fromRotationY) * progress;
                     },
                 });
+            },
+            toNumber(string) {
+                const number = string ? Number(string) : 0;
+                return Number.isFinite(number) ? number : 0;
             }
         }
     }).mount("#app");

@@ -213,6 +213,13 @@
                  @input="duration = toNumber($event.target.value)">
           </div>
           <div class="row mt2">
+          <div class="w130px">Pause:</div>
+          <input type="number"
+                 step="0.1"
+                 :value="String(pause)"
+                 @input="pause = toNumber($event.target.value)">
+          </div>
+          <div class="row mt2">
           <div class="w130px">Horizontal angle:</div>
           <input type="number"
                  step="0.1"
@@ -255,11 +262,12 @@
         data() {
             return {
                 duration: Number(localStorage.getItem("VR.moving.duration") || "0"),
+                pause: Number(localStorage.getItem("VR.moving.pause") || "0"),
                 fromRotationX: Number(localStorage.getItem("VR.moving.fromRotationX") || "0"),
                 toRotationX: Number(localStorage.getItem("VR.moving.toRotationX") || "0"),
                 fromRotationY: Number(localStorage.getItem("VR.moving.fromRotationY") || "0"),
                 toRotationY: Number(localStorage.getItem("VR.moving.toRotationY") || "0"),
-                direction: 1,
+                state: 0,
                 rotationAnimation: null,
             };
         },
@@ -273,6 +281,9 @@
         watch: {
             duration(newDuration) {
                 localStorage.setItem("VR.moving.duration", String(newDuration));
+            },
+            pause(newPause) {
+                localStorage.setItem("VR.moving.pause", String(newPause));
             },
             fromRotationX(newFromRotationX) {
                 localStorage.setItem("VR.moving.fromRotationX", String(newFromRotationX));
@@ -289,14 +300,24 @@
         },
         methods: {
             onStartMoving() {
-                if (this.direction > 0) {
+                if (this.state === 0) {
                     this.animateVrRotationTo(this.toRotationX, this.toRotationY, () => {
-                        this.direction = -1;
+                        this.state = this.pause > 0 ? 1 : 2;
                         this.onStartMoving();
                     });
-                } else if (this.direction < 0) {
+                } else if (this.state === 1) {
+                    this.pauseVrAnimation(() => {
+                        this.state = 2;
+                        this.onStartMoving();
+                    });
+                } else if (this.state === 2) {
                     this.animateVrRotationTo(this.fromRotationX, this.fromRotationY, () => {
-                        this.direction = 1;
+                        this.state = this.pause > 0 ? 3 : 0;
+                        this.onStartMoving();
+                    });
+                } else if (this.state === 3) {
+                    this.pauseVrAnimation(() => {
+                        this.state = 0;
                         this.onStartMoving();
                     });
                 }
@@ -316,6 +337,14 @@
                         this.vr.rotationX = fromRotationX + (rotationX - fromRotationX) * progress;
                         this.vr.rotationY = fromRotationY + (rotationY - fromRotationY) * progress;
                     },
+                });
+            },
+            pauseVrAnimation(onEnd) {
+                this.rotationAnimation?.stop();
+                this.rotationAnimation = animate({
+                    duration: this.pause * 1000,
+                    timing: linear,
+                    onEnd
                 });
             },
             toNumber(string) {

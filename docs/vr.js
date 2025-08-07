@@ -47,6 +47,9 @@ class Vr {
     _xrReferenceSpace = null;
     _xrAnimationFrameRequestID = null;
 
+    _animation = null;
+    _animationAbortController = null;
+
     constructor(canvas) {
         this._canvas = canvas;
     }
@@ -145,6 +148,67 @@ class Vr {
         this._xrAnimationFrameRequestID = this._xrSession.requestAnimationFrame((time, xrFrame) =>
             this.onXrAnimationFrame(time, xrFrame)
         );
+        this.playAnimation();
+    }
+
+    setAnimation(animation) {
+        this.stopAnimation();
+        this._animation = animation;
+        this.playAnimation();
+    }
+
+    stopAnimation() {
+        if (this._animationAbortController) {
+            this._animationAbortController.abort();
+            this._animationAbortController = null;
+        }
+    }
+
+    playAnimation() {
+        if (this.running && this._animation) {
+            this._animationAbortController = new AbortController();
+            this._animation(this._animate.bind(this), this._animationAbortController.signal);
+        }
+    }
+
+    _animate({timing, duration, onUpdate, abortSignal}) {
+        return new Promise(resolve => {
+            if (abortSignal?.aborted) {
+                resolve();
+                return;
+            }
+
+            let running = true;
+
+            const abortListener = () => {
+                running = false;
+                resolve();
+            };
+            abortSignal?.addEventListener("abort", abortListener);
+
+            const start = performance.now();
+            const animateInner = time => {
+                if (!running) {
+                    return;
+                }
+
+                let timeFraction = (time - start) / duration;
+                if (timeFraction > 1) {
+                    timeFraction = 1;
+                }
+
+                onUpdate?.(timing(timeFraction));
+
+                if (timeFraction < 1) {
+                    this._xrSession.requestAnimationFrame(animateInner);
+                } else {
+                    running = false;
+                    abortSignal?.removeEventListener("abort", abortListener);
+                    resolve();
+                }
+            };
+            this._xrSession.requestAnimationFrame(animateInner);
+        });
     }
 
     onXrAnimationFrame(time, xrFrame) {
@@ -155,6 +219,7 @@ class Vr {
     }
 
     async stopVrSession() {
+        this.stopAnimation();
         await this._xrSession?.end();
     }
 
@@ -207,5 +272,9 @@ class Vr {
 
     get running() {
         return Boolean(this._xrAnimationFrameRequestID);
+    }
+
+    get hasAnimation() {
+        return Boolean(this._animation);
     }
 }

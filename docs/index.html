@@ -9,7 +9,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <script src="https://unpkg.com/gl-matrix@2.8.1/dist/gl-matrix-min.js"></script>
     <script src="https://unpkg.com/vue@3.0.11"></script>
-    <script src="animate.js"></script>
     <script src="vr.js"></script>
     <style>
         body {
@@ -71,6 +70,21 @@
 
 </body>
 <script type="module">
+    const setAbortableTimeout = (handler, timeout, abortSignal) => {
+        if (abortSignal?.aborted) {
+            return;
+        }
+        let timeoutId;
+        const abortListener = () => {
+            clearTimeout(timeoutId);
+        };
+        abortSignal?.addEventListener("abort", abortListener);
+        timeoutId = setTimeout(() => {
+            abortSignal?.removeEventListener("abort", abortListener);
+            handler();
+        }, timeout);
+    };
+    const easeInOutSine = x => -(Math.cos(Math.PI * x) - 1) / 2;
     Vue.createApp({
         // language=Vue
         template: `
@@ -216,12 +230,12 @@
             <div class="row mt2">
                 <button type="button"
                         v-on:click="onStartMoving"
-                        v-bind:disabled="rotationAnimation && rotationAnimation.running">
+                        v-bind:disabled="vr.hasAnimation">
                     Start
                 </button>
                 <button type="button"
                         v-on:click="onStopMoving"
-                        v-bind:disabled="!rotationAnimation || !rotationAnimation.running">
+                        v-bind:disabled="!vr.hasAnimation">
                     Stop
                 </button>
             </div>
@@ -237,8 +251,6 @@
                 toRotationX: Number(localStorage.getItem("VR.moving.toRotationX") || "0"),
                 fromRotationY: Number(localStorage.getItem("VR.moving.fromRotationY") || "0"),
                 toRotationY: Number(localStorage.getItem("VR.moving.toRotationY") || "0"),
-                state: 0,
-                rotationAnimation: null,
             };
         },
         mounted() {
@@ -270,52 +282,35 @@
         },
         methods: {
             onStartMoving() {
-                if (this.state === 0) {
-                    this.animateVrRotationTo(this.toRotationX, this.toRotationY, () => {
-                        this.state = this.pause > 0 ? 1 : 2;
-                        this.onStartMoving();
-                    });
-                } else if (this.state === 1) {
-                    this.pauseVrAnimation(() => {
-                        this.state = 2;
-                        this.onStartMoving();
-                    });
-                } else if (this.state === 2) {
-                    this.animateVrRotationTo(this.fromRotationX, this.fromRotationY, () => {
-                        this.state = this.pause > 0 ? 3 : 0;
-                        this.onStartMoving();
-                    });
-                } else if (this.state === 3) {
-                    this.pauseVrAnimation(() => {
-                        this.state = 0;
-                        this.onStartMoving();
-                    });
-                }
+                this.vr.setAnimation(async (animate, abortSignal) => {
+                    while (!abortSignal.aborted) {
+                        this.vr.rotationX = this.fromRotationX;
+                        this.vr.rotationY = this.fromRotationY;
+                        await animate({
+                            duration: this.duration * 1000,
+                            timing: easeInOutSine,
+                            onUpdate: progress => {
+                                this.vr.rotationX = this.fromRotationX + (this.toRotationX - this.fromRotationX) * progress;
+                                this.vr.rotationY = this.fromRotationY + (this.toRotationY - this.fromRotationY) * progress;
+                            },
+                            abortSignal,
+                        });
+                        await new Promise(resolve => setAbortableTimeout(resolve, this.pause * 1000, abortSignal));
+                        await animate({
+                            duration: this.duration * 1000,
+                            timing: easeInOutSine,
+                            onUpdate: progress => {
+                                this.vr.rotationX = this.toRotationX + (this.fromRotationX - this.toRotationX) * progress;
+                                this.vr.rotationY = this.toRotationY + (this.fromRotationY - this.toRotationY) * progress;
+                            },
+                            abortSignal,
+                        });
+                        await new Promise(resolve => setAbortableTimeout(resolve, this.pause * 1000, abortSignal));
+                    }
+                });
             },
             onStopMoving() {
-                this.rotationAnimation?.stop();
-            },
-            animateVrRotationTo(rotationX, rotationY, onEnd) {
-                this.rotationAnimation?.stop();
-                const fromRotationX = this.vr.rotationX;
-                const fromRotationY = this.vr.rotationY;
-                this.rotationAnimation = animate({
-                    duration: this.duration * 1000,
-                    timing: easeInOutSine,
-                    onEnd,
-                    onUpdate: progress => {
-                        this.vr.rotationX = fromRotationX + (rotationX - fromRotationX) * progress;
-                        this.vr.rotationY = fromRotationY + (rotationY - fromRotationY) * progress;
-                    },
-                });
-            },
-            pauseVrAnimation(onEnd) {
-                this.rotationAnimation?.stop();
-                this.rotationAnimation = animate({
-                    duration: this.pause * 1000,
-                    timing: linear,
-                    onEnd
-                });
+                this.vr.setAnimation(null);
             },
             toNumber(string) {
                 const number = string ? Number(string) : 0;

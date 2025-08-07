@@ -9,7 +9,7 @@ function animate({timing, duration, onStart, onUpdate, onEnd}) {
         get running() {
             return this._running;
         }
-    }
+    };
 
     const start = performance.now();
     requestAnimationFrame(function animateInner(time) {

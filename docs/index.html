@@ -74,28 +74,28 @@
     Vue.createApp({
         // language=Vue
         template: `
-          <canvas id="canvas" class="canvas"></canvas>
-          <div class="row w100">
-          <button type="button" class="h50px grow" v-on:click="onStartVr" v-bind:disabled="vr.running">
-            Start VR
-          </button>
-          <button type="button" class="h50px ml1" v-on:click="vr.stopVrSession()" v-bind:disabled="!vr.running">
-            Stop VR
-          </button>
-          </div>
-          <div class="error row mt2" v-if="error">
-          {{ error }}
-          </div>
-          <div class="row mt2">
-          <label><input type="radio" id="mode" value="moving" v-model="mode">Moving</label>
-          <label><input class="ml1" type="radio" id="mode" value="fixed" v-model="mode">Fixed</label>
-          </div>
-          <fixed-rotation-panel
-              v-if="mode === 'fixed'"
-              v-bind:vr="vr"></fixed-rotation-panel>
-          <moving-rotation-panel
-              v-if="mode === 'moving'"
-              v-bind:vr="vr"></moving-rotation-panel>
+            <canvas id="canvas" class="canvas"></canvas>
+            <div class="row w100">
+                <button type="button" class="h50px grow" v-on:click="onStartVr" v-bind:disabled="vr.running">
+                    Start VR
+                </button>
+                <button type="button" class="h50px ml1" v-on:click="vr.stopVrSession()" v-bind:disabled="!vr.running">
+                    Stop VR
+                </button>
+            </div>
+            <div class="error row mt2" v-if="error">
+                {{ error }}
+            </div>
+            <div class="row mt2">
+                <label><input type="radio" id="mode" value="moving" v-model="mode">Moving</label>
+                <label><input class="ml1" type="radio" id="mode" value="fixed" v-model="mode">Fixed</label>
+            </div>
+            <fixed-rotation-panel
+                v-if="mode === 'fixed'"
+                v-bind:vr="vr"></fixed-rotation-panel>
+            <moving-rotation-panel
+                v-if="mode === 'moving'"
+                v-bind:vr="vr"></moving-rotation-panel>
         `,
         data() {
             return {
@@ -124,23 +124,23 @@
     }).component("fixed-rotation-panel", {
         // language=Vue
         template: `
-          <div class="row mt2">
-          <div class="w130px">Horizontal angle:</div>
-          <input type="number"
-                 step="0.1"
-                 :value="String(rotationY)"
-                 @input="setRotationY(toNumber($event.target.value))">
-          </div>
-          <div class="row mt2">
-          <div class="w130px">Vertical angle:</div>
-          <input type="number"
-                 step="0.1"
-                 :value="String(rotationX)"
-                 @input="setRotationX(toNumber($event.target.value))">
-          </div>
-          <div class="row mt2">
-          <label><input type="checkbox" v-model="smoothChange">Smooth change</label>
-          </div>
+            <div class="row mt2">
+                <div class="w130px">Horizontal angle:</div>
+                <input type="number"
+                       step="0.1"
+                       :value="String(rotationY)"
+                       @input="setRotationY(toNumber($event.target.value))">
+            </div>
+            <div class="row mt2">
+                <div class="w130px">Vertical angle:</div>
+                <input type="number"
+                       step="0.1"
+                       :value="String(rotationX)"
+                       @input="setRotationX(toNumber($event.target.value))">
+            </div>
+            <div class="row mt2">
+                <label><input type="checkbox" v-model="smoothChange">Smooth change</label>
+            </div>
         `,
         props: {
             vr: {type: Vr, required: true},
@@ -205,56 +205,56 @@
     }).component("moving-rotation-panel", {
         // language=Vue
         template: `
-          <div class="row mt2">
-          <div class="w130px">Duration:</div>
-          <input type="number"
-                 step="0.1"
-                 :value="String(duration)"
-                 @input="duration = toNumber($event.target.value)">
-          </div>
-          <div class="row mt2">
-          <div class="w130px">Pause:</div>
-          <input type="number"
-                 step="0.1"
-                 :value="String(pause)"
-                 @input="pause = toNumber($event.target.value)">
-          </div>
-          <div class="row mt2">
-          <div class="w130px">Horizontal angle:</div>
-          <input type="number"
-                 step="0.1"
-                 :value="String(fromRotationY)"
-                 @input="fromRotationY = toNumber($event.target.value)">
-          <input class="ml1"
-                 type="number"
-                 step="0.1"
-                 :value="String(toRotationY)"
-                 @input="toRotationY = toNumber($event.target.value)">
-          </div>
-          <div class="row mt2">
-          <div class="w130px">Vertical angle:</div>
-          <input type="number"
-                 step="0.1"
-                 :value="String(fromRotationX)"
-                 @input="fromRotationX = toNumber($event.target.value)">
-          <input class="ml1"
-                 type="number"
-                 step="0.1"
-                 :value="String(toRotationX)"
-                 @input="toRotationX = toNumber($event.target.value)">
-          </div>
-          <div class="row mt2">
-          <button type="button"
-                  v-on:click="onStartMoving"
-                  v-bind:disabled="rotationAnimation && rotationAnimation.running">
-            Start
-          </button>
-          <button type="button"
-                  v-on:click="onStopMoving"
-                  v-bind:disabled="!rotationAnimation || !rotationAnimation.running">
-            Stop
-          </button>
-          </div>
+            <div class="row mt2">
+                <div class="w130px">Duration:</div>
+                <input type="number"
+                       step="0.1"
+                       :value="String(duration)"
+                       @input="duration = toNumber($event.target.value)">
+            </div>
+            <div class="row mt2">
+                <div class="w130px">Pause:</div>
+                <input type="number"
+                       step="0.1"
+                       :value="String(pause)"
+                       @input="pause = toNumber($event.target.value)">
+            </div>
+            <div class="row mt2">
+                <div class="w130px">Horizontal angle:</div>
+                <input type="number"
+                       step="0.1"
+                       :value="String(fromRotationY)"
+                       @input="fromRotationY = toNumber($event.target.value)">
+                <input class="ml1"
+                       type="number"
+                       step="0.1"
+                       :value="String(toRotationY)"
+                       @input="toRotationY = toNumber($event.target.value)">
+            </div>
+            <div class="row mt2">
+                <div class="w130px">Vertical angle:</div>
+                <input type="number"
+                       step="0.1"
+                       :value="String(fromRotationX)"
+                       @input="fromRotationX = toNumber($event.target.value)">
+                <input class="ml1"
+                       type="number"
+                       step="0.1"
+                       :value="String(toRotationX)"
+                       @input="toRotationX = toNumber($event.target.value)">
+            </div>
+            <div class="row mt2">
+                <button type="button"
+                        v-on:click="onStartMoving"
+                        v-bind:disabled="rotationAnimation && rotationAnimation.running">
+                    Start
+                </button>
+                <button type="button"
+                        v-on:click="onStopMoving"
+                        v-bind:disabled="!rotationAnimation || !rotationAnimation.running">
+                    Stop
+                </button>
+            </div>
         `,
         props: {
             vr: {type: Vr, required: true},

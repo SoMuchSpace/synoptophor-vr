@@ -44,7 +44,7 @@ class Vr {
     _uViewMatrixLocation = null;
 
     _xrSession = null;
-    _xrReferenceSpace = null
+    _xrReferenceSpace = null;
     _xrAnimationFrameRequestID = null;
 
     constructor(canvas) {
@@ -117,7 +117,7 @@ class Vr {
         ]), this._gl.STATIC_DRAW);
 
         this._textureBuffer = this._gl.createBuffer();
-        this._gl.bindBuffer(this._gl.ARRAY_BUFFER, this._textureBuffer)
+        this._gl.bindBuffer(this._gl.ARRAY_BUFFER, this._textureBuffer);
         this._gl.bufferData(
             this._gl.ARRAY_BUFFER,
             new Float32Array([
@@ -190,7 +190,7 @@ class Vr {
         this._gl.vertexAttribPointer(this._aVertexPositionLocation, 3, this._gl.FLOAT, false, 0, 0);
 
         this._gl.enableVertexAttribArray(this._aTextureCoordinatesLocation);
-        this._gl.bindBuffer(this._gl.ARRAY_BUFFER, this._textureBuffer)
+        this._gl.bindBuffer(this._gl.ARRAY_BUFFER, this._textureBuffer);
         this._gl.vertexAttribPointer(this._aTextureCoordinatesLocation, 2, this._gl.FLOAT, false, 0, 0);
 
         this._gl.uniformMatrix4fv(this._uViewMatrixLocation, false, mat4.create());

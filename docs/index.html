@@ -138,9 +138,6 @@
                        :value="String(rotationX)"
                        @input="setRotationX(toNumber($event.target.value))">
             </div>
-            <div class="row mt2">
-                <label><input type="checkbox" v-model="smoothChange">Smooth change</label>
-            </div>
         `,
         props: {
             vr: {type: Vr, required: true},
@@ -149,7 +146,6 @@
             return {
                 rotationX: Number(localStorage.getItem("VR.fixed.rotationX") || "0"),
                 rotationY: Number(localStorage.getItem("VR.fixed.rotationY") || "0"),
-                smoothChange: true,
                 rotationAnimation: null,
             };
         },
@@ -163,39 +159,13 @@
         methods: {
             setRotationX(newRotationX) {
                 localStorage.setItem("VR.fixed.rotationX", newRotationX);
-                if (this.smoothChange) {
-                    this.animateVrRotationTo(newRotationX, this.vr.rotationY, () => {
-                        this.rotationX = newRotationX;
-                    });
-                } else {
-                    this.vr.rotationX = newRotationX;
-                    this.rotationX = newRotationX;
-                }
+                this.vr.rotationX = newRotationX;
+                this.rotationX = newRotationX;
             },
             setRotationY(newRotationY) {
                 localStorage.setItem("VR.fixed.rotationY", newRotationY);
-                if (this.smoothChange) {
-                    this.animateVrRotationTo(this.vr.rotationX, newRotationY, () => {
-                        this.rotationY = newRotationY;
-                    });
-                } else {
-                    this.vr.rotationY = newRotationY;
-                    this.rotationY = newRotationY;
-                }
-            },
-            animateVrRotationTo(rotationX, rotationY, onEnd) {
-                this.rotationAnimation?.stop();
-                const fromRotationX = this.vr.rotationX;
-                const fromRotationY = this.vr.rotationY;
-                this.rotationAnimation = animate({
-                    duration: 1000,
-                    timing: linear,
-                    onEnd,
-                    onUpdate: progress => {
-                        this.vr.rotationX = fromRotationX + (rotationX - fromRotationX) * progress;
-                        this.vr.rotationY = fromRotationY + (rotationY - fromRotationY) * progress;
-                    },
-                });
+                this.vr.rotationY = newRotationY;
+                this.rotationY = newRotationY;
             },
             toNumber(string) {
                 const number = string ? Number(string) : 0;

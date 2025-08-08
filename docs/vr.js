@@ -1,4 +1,6 @@
-class Vr {
+import {mat4} from "https://unpkg.com/gl-matrix@3.4.3/esm/index.js";
+
+export class Vr {
 
     rotationY = 0;
     rotationX = 0;

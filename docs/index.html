@@ -7,9 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <script src="https://unpkg.com/gl-matrix@2.8.1/dist/gl-matrix-min.js"></script>
-    <script src="https://unpkg.com/vue@3.5.18"></script>
-    <script src="vr.js"></script>
     <style>
         body {
             display: flex;
@@ -70,6 +67,9 @@
 
 </body>
 <script type="module">
+    import {createApp} from "https://unpkg.com/vue@3.5.18/dist/vue.esm-browser.prod.js";
+    import {Vr} from "./vr.js";
+
     const setAbortableTimeout = (handler, timeout, abortSignal) => {
         if (abortSignal?.aborted) {
             return;
@@ -84,8 +84,10 @@
             handler();
         }, timeout);
     };
+
     const easeInOutSine = x => -(Math.cos(Math.PI * x) - 1) / 2;
-    Vue.createApp({
+
+    createApp({
         // language=Vue
         template: `
             <canvas id="canvas" class="canvas"></canvas>

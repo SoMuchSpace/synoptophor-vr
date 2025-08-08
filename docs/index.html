@@ -143,14 +143,14 @@
                 <input type="number"
                        step="0.1"
                        :value="String(rotationY)"
-                       @input="setRotationY(toNumber($event.target.value))">
+                       @input="rotationY = handleNumberInput($event.target.value, 'VR.fixed.rotationY', value => vr.rotationY = value)">
             </div>
             <div class="row mt2">
                 <div class="w130px">Vertical angle:</div>
                 <input type="number"
                        step="0.1"
                        :value="String(rotationX)"
-                       @input="setRotationX(toNumber($event.target.value))">
+                       @input="rotationX = handleNumberInput($event.target.value, 'VR.fixed.rotationX', value => vr.rotationX = value)">
             </div>
         `,
         props: {
@@ -160,30 +160,21 @@
             return {
                 rotationX: Number(localStorage.getItem("VR.fixed.rotationX") || "0"),
                 rotationY: Number(localStorage.getItem("VR.fixed.rotationY") || "0"),
-                rotationAnimation: null,
             };
         },
         mounted() {
             this.vr.rotationX = this.rotationX;
             this.vr.rotationY = this.rotationY;
         },
-        beforeUnmount() {
-            this.rotationAnimation?.stop();
-        },
         methods: {
-            setRotationX(newRotationX) {
-                localStorage.setItem("VR.fixed.rotationX", newRotationX);
-                this.vr.rotationX = newRotationX;
-                this.rotationX = newRotationX;
-            },
-            setRotationY(newRotationY) {
-                localStorage.setItem("VR.fixed.rotationY", newRotationY);
-                this.vr.rotationY = newRotationY;
-                this.rotationY = newRotationY;
-            },
-            toNumber(string) {
-                const number = string ? Number(string) : 0;
-                return Number.isFinite(number) ? number : 0;
+            handleNumberInput(value, localStorageKey, callback) {
+                const number = Number.parseFloat(value);
+                if (Number.isNaN(number)) {
+                    return value;
+                }
+                localStorage.setItem(localStorageKey, String(value));
+                callback?.(number);
+                return number;
             }
         }
     }).component("moving-rotation-panel", {
@@ -194,38 +185,38 @@
                 <input type="number"
                        step="0.1"
                        :value="String(duration)"
-                       @input="duration = toNumber($event.target.value)">
+                       @input="duration = handleNumberInput($event.target.value, 'VR.moving.duration')">
             </div>
             <div class="row mt2">
                 <div class="w130px">Pause:</div>
                 <input type="number"
                        step="0.1"
                        :value="String(pause)"
-                       @input="pause = toNumber($event.target.value)">
+                       @input="pause = handleNumberInput($event.target.value, 'VR.moving.pause')">
             </div>
             <div class="row mt2">
                 <div class="w130px">Horizontal angle:</div>
                 <input type="number"
                        step="0.1"
                        :value="String(fromRotationY)"
-                       @input="fromRotationY = toNumber($event.target.value)">
+                       @input="fromRotationY = handleNumberInput($event.target.value, 'VR.moving.fromRotationY')">
                 <input class="ml1"
                        type="number"
                        step="0.1"
                        :value="String(toRotationY)"
-                       @input="toRotationY = toNumber($event.target.value)">
+                       @input="toRotationY = handleNumberInput($event.target.value, 'VR.moving.toRotationY')">
             </div>
             <div class="row mt2">
                 <div class="w130px">Vertical angle:</div>
                 <input type="number"
                        step="0.1"
                        :value="String(fromRotationX)"
-                       @input="fromRotationX = toNumber($event.target.value)">
+                       @input="fromRotationX = handleNumberInput($event.target.value, 'VR.moving.fromRotationX')">
                 <input class="ml1"
                        type="number"
                        step="0.1"
                        :value="String(toRotationX)"
-                       @input="toRotationX = toNumber($event.target.value)">
+                       @input="toRotationX = handleNumberInput($event.target.value, 'VR.moving.toRotationX')">
             </div>
             <div class="row mt2">
                 <button type="button"
@@ -260,29 +251,19 @@
         beforeUnmount() {
             this.onStopMoving();
         },
-        watch: {
-            duration(newDuration) {
-                localStorage.setItem("VR.moving.duration", String(newDuration));
-            },
-            pause(newPause) {
-                localStorage.setItem("VR.moving.pause", String(newPause));
-            },
-            fromRotationX(newFromRotationX) {
-                localStorage.setItem("VR.moving.fromRotationX", String(newFromRotationX));
-            },
-            toRotationX(newToRotationX) {
-                localStorage.setItem("VR.moving.toRotationX", String(newToRotationX));
-            },
-            fromRotationY(newFromRotationY) {
-                localStorage.setItem("VR.moving.fromRotationY", String(newFromRotationY));
-            },
-            toRotationY(newToRotationY) {
-                localStorage.setItem("VR.moving.toRotationY", String(newToRotationY));
-            },
-        },
         methods: {
             onStartMoving() {
                 this.vr.setAnimation(async (animate, abortSignal) => {
+                    if ([
+                        this.duration,
+                        this.pause,
+                        this.fromRotationX,
+                        this.fromRotationY,
+                        this.toRotationX,
+                        this.toRotationY,
+                    ].some(type => typeof type !== "number")) {
+                        return;
+                    }
                     while (!abortSignal.aborted) {
                         this.vr.rotationX = this.fromRotationX;
                         this.vr.rotationY = this.fromRotationY;
@@ -312,9 +293,13 @@
             onStopMoving() {
                 this.vr.setAnimation(null);
             },
-            toNumber(string) {
-                const number = string ? Number(string) : 0;
-                return Number.isFinite(number) ? number : 0;
+            handleNumberInput(value, localStorageKey) {
+                const number = Number.parseFloat(value);
+                if (Number.isNaN(number)) {
+                    return value;
+                }
+                localStorage.setItem(localStorageKey, String(value));
+                return number;
             }
         }
     }).mount("#app");
